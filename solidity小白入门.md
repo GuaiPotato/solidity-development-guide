@@ -83,7 +83,7 @@
 
 - `FISCO BCOS`提供的`Table CRUD`API（啥是API？就是你把文件一导入就能直接用它写好的函数）e.g.：![image.png](https://img13.360buyimg.com/ddimg/jfs/t1/235253/31/7693/50815/65770b09F343cf2fb/7ab91b1171e9a405.jpg)
 
-  这个时候你又要问啦：**Table是什么东西啊？**🤔
+  这个时候你又要问啦：**Table是什么东西啊？** 🤔
 
   Table？简单理解就是**excel**，那玩意不也叫做Table（表）嘛，一样的一样的😘。
 
