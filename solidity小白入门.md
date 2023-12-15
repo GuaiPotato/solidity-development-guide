@@ -10,7 +10,7 @@
 
 > 首先上来别管那么多，运行个HelloWorld！
 
-1. 创建一个文件夹
+1. 创建一个文件夹 
 2. 导入HelloWorld.sol
 3. 编译
 4. 选择用户进行部署
@@ -89,11 +89,11 @@
 
   Table？简单理解就是**excel**，那玩意不也叫做Table（表）嘛，一样的一样的😘。
 
-> **题外话**：实际业务中数据还是存储在数据库中的。这个是通过ORM实体映射实现的（别慌，就是数据库库表设计，啥存数据库都一样）。由此可见，区块链的主要应用还是在加密和安全同步（防止篡改）上。
+> **题外话**：实际业务中数据还是存储在数据库中的。这个是通过ORM实体映射实现的（别慌！它就是数据库表设计，啥存数据库都一样）。由此可见，区块链的主要应用还是在加密和安全同步（防止篡改）上。
 
 
 
-## 开发常见工具&概念
+## 开发概念
 
 ### Table CRUD
 
@@ -141,43 +141,27 @@
 
 在区块链中，有两种**存储修饰符**： **storage**和**memory**，分别代表着**永久存储**和**暂时存储**。如果不使用修饰符，则默认使用**storage**（在[开发流程](#开发流程)中我们就使用了默认状态）。
 
-提出问题——storage资源占用——区块链变量存储上限——跳转注意点——推荐memory——跳转注意点memory——
+聪明的你一定发现了一个问题：如果都使用**storage**进行存储，且由于区块链的特性，数据不会消失，这样岂不是会造成大量的冗余数据，并且会给区块链服务器带来很大的资源消耗？🤔
+
+你是正确的。**storage**将会给区块链服务器带来极大的资源消耗，并且就像一座垃圾山一样越堆越大。为了防止这种事情出现，每个合约(智能合约)的存储(**stroage**)是有限的，且具体的限制取决于所使用的区块链平台和协议。在**FISCO BCOS**中，每个合约最多允许定义1024个存储变量。并且在区块链中，每次存储都需要消耗gas。因此，我们需要尽可能的使用**memory**存储修饰符。
+
+> 关于**memory**的使用，需要留意一些特殊的类型。详情[看这](#memory)。
+
+**释放机制**
+
+在区块链中，存储的变量只有在一个时候会进行释放——**合约销毁**。而让合约销毁只有一个办法——使用`slefdestruct()`函数。
+
+> 该函数存在一个安全漏洞。详情见[[智能合约安全漏洞](https://github.com/GuaiPotato/Solidity-Development-Guide/blob/master/%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E.md#%E5%8D%B7%E4%B8%89)。
 
 
 
-释放机制——销毁合约——安全漏洞
+#### 构造函数
+
+构造函数就是在部署合约的时候会自动调用的函数。一般的用途是初始化权限和数据。比如将合约管理者权限设置为部署时的用户。
 
 
 
-### 合约相关参数
-
-#### contractAddress
-
-合约存储的地址
-
-#### abi
-
-ABI 定义了合约方法的名称、参数类型、返回类型和事件的结构。
-
-#### bin
-
-
-
-
-
-## solidity开发语言
-
-这语言给我感觉是**SQL**+**面向对象**。主要原因是**FISCO BCOS**提供了这套**Table CRUD**，不能说就像，根本就是**SQL**。再加上语言本身是**面向对象**的。哇，这语言真不错。（毕竟是收入最高的语言😎）
-
-### 面向对象
-
-**面向对象**这个概念可以参考[韩顺平30天零基础速成JAVA](https://www.bilibili.com/video/BV1fh411y7R8?p=194)。这个概念很重要，在很多编程语言中都有体现。（不过随着web的发展，现在的语言逐渐像接口化发展了，e.g.：Golang）
-
-### SQL
-
-SQL的知识可以学习一下**MySQL**数据库的使用。
-
-### 事件
+#### 事件
 
 > solidity中的事件类似日志。
 >
@@ -234,6 +218,127 @@ SQL的知识可以学习一下**MySQL**数据库的使用。
 
 
 
+#### 修饰符
+
+在solidity中，修饰符可以分为：
+
+- 访问控制修饰符：
+
+  - `public`：可以从合约内部和外部访问。
+  - `private`：只能在当前合约内部访问。
+  - `internal`：只能在当前合约内部访问，以及继承该合约的合约内部访问。**（默认）**
+  - `external`：只能从合约外部访问，不能从合约内部访问。
+
+- 状态修改修饰符：
+
+  - `view`：声明函数不会修改状态。
+  - `pure`：声明函数不会修改状态且不会读取合约的存储状态。
+
+- 安全修饰符：
+
+  - `payable`：声明函数可以接收以太币。
+
+- 自定义修饰符：
+
+  - 自定义修饰符`modifier`允许开发者根据特定需求创建自己的修饰符，以增加额外的逻辑或功能。例如，可以使用自定义修饰符来实现访问控制、日志记录等。
+
+    ```solidity
+    contract MyContract {
+        address public owner;
+    
+        modifier onlyOwner() {
+        	// 执行函数前的逻辑
+            require(msg.sender == owner, "Only the contract owner can call this function");
+            _; // 继续执行被修饰的函数体
+            // 执行完函数后的逻辑
+        }
+    
+        function doSomething() public onlyOwner {
+            // 只有合约的所有者可以调用该函数
+            // 执行函数逻辑
+        }
+    }
+    ```
+
+这些修饰符主要是用于**函数**的。在solidity中，变量一般使用**类型** + **存储修饰符** + **访问控制修饰符**定义。e.g.:
+
+```solidity
+contract MyContract {
+	string memory public name;
+}
+```
+
+
+
+#### 函数
+
+函数使用`function`关键字进行定义。e.g.一个带支付功能的函数：
+
+```solidity
+contract MyContract {
+    address public owner;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can call this function");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+	// 
+    function myFunction() public payable onlyOwner returns (bool) {
+        // 执行函数逻辑
+        // 判断用户支付的钱是否超过了 1 ether（货币单位）
+        if(msg.value > 1 ether) {
+        	// 大于1 返回 true
+        	return true;
+        }
+       	// 小于1 返回 false
+        return false;
+    }
+}
+```
+
+> 用户在调用**myFunction**函数的时候，可以指定本次调用携带多少货币，并可以在函数中通过`msg.value`读取货币的数量。单位的使用见[单位和全局可用变量](#单位和全局可用变量)
+
+
+
+### 合约相关参数
+
+#### contractAddress
+
+合约存储的地址
+
+#### abi
+
+智能合约的接口定义，它描述了智能合约的可调用函数、函数参数和返回值的类型、事件定义等信息。ABI 是一个描述智能合约与其他合约或外部应用程序之间通信规则的规范。它定义了如何正确地调用合约的函数以及如何解析合约返回的数据。ABI 通常以 JSON 格式表示。
+
+#### bin
+
+智能合约的二进制代码。它是将智能合约源代码编译为机器可执行的二进制形式。智能合约的 BIN 是由编译器生成的，它是智能合约在区块链上部署和执行的实际代码表示形式。
+
+
+
+## solidity开发语言
+
+这语言给我感觉是**SQL**+**面向对象**。主要原因是**FISCO BCOS**提供了这套**Table CRUD**，不能说就像，根本就是**SQL**。再加上语言本身是**面向对象**的。哇，这语言真不错。（毕竟是收入最高的语言😎）
+
+### 面向对象
+
+**面向对象**这个概念可以参考[韩顺平30天零基础速成JAVA](https://www.bilibili.com/video/BV1fh411y7R8?p=194)。这个概念很重要，在很多编程语言中都有体现。（不过随着web的发展，现在的语言逐渐像接口化发展了，e.g.：Golang）
+
+### SQL
+
+SQL的知识可以学习一下**MySQL**数据库的使用。
+
+### 单位和全局可用变量
+
+见[官方文档](https://docs.soliditylang.org/en/v0.8.23/units-and-global-variables.html)
+
+
+
 
 ## 开发注意点
 
@@ -258,7 +363,7 @@ SQL的知识可以学习一下**MySQL**数据库的使用。
 
 #### memory
 
-一些特定的类型不能使用`memory`修饰符，不然会爆`TypeError：Storage location can only be given for array or struct types.`
+一些特定的类型不能使用`memory`修饰符，不然会爆错`TypeError：Storage location can only be given for array or struct types.`
 
 ![image.png](https://img12.360buyimg.com/ddimg/jfs/t1/224241/30/7652/4175/657704c8F779a1fdd/c0217e1ccadd7a81.jpg)
 
@@ -311,3 +416,19 @@ Table不能直接获取全部表数据。目前有两种解决方案：
 > uuid就是在id的基础上，使用分布式算法生成的全局唯一的id。
 
 <img src="https://img14.360buyimg.com/ddimg/jfs/t1/226299/13/7808/53089/65790b94F420881f2/114ea0d52c17552f.jpg" alt="image.png" style="zoom:50%;" />
+
+
+
+## 开发工具
+
+可以在webase的控制台上进行开发，但是我还是建议使用**visual studio** (vscode)。
+
+开发solidity的插件直接在插件市场搜索**solidity**，安装使用人数最多的就可以了。
+
+除此以外小白第一次用vscode一定要做的两件事情：
+
+1. 修改自动保存为：**在焦点变化时**。
+
+   左下角齿轮，设置，第一个自动保存，修改**off**为**onFocusChange**。
+
+2. 安装中文插件**Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code**（英语好可以不用）
