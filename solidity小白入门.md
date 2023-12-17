@@ -126,7 +126,7 @@
 
 ### 智能合约
 
-> 本文档将以最容易最简单的形式简述智能合约的相关内容。
+> 本文档将以最容易最简单的形式简述智能合约开发的相关内容。如果对智能合约是什么问题，可以查看[智能合约](https://github.com/GuaiPotato/Solidity-Development-Guide/blob/master/%E5%8C%BA%E5%9D%97%E9%93%BE%E7%AE%80%E4%BB%8B.md#%E6%99%BA%E8%83%BD%E5%90%88%E7%BA%A6)。
 
 合约一般包括：
 
